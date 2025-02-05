@@ -11,7 +11,7 @@ export class DataStorageService {
 
       return JSON.parse(await fs.readFile(this.jsonFilePath, "utf-8")) as Array<WatchedAccount>;
     } catch (ex) {
-      console.log("Failed to get data from JSON. Seeding default")
+      console.warn("Failed to get data from JSON. Seeding default")
 
       return getDefaultPlayers();
     }

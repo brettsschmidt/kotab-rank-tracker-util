@@ -1,5 +1,6 @@
 import { rankToLP } from "../helpers/rank.helpers";
 import { MessageEvents } from "../interfaces/message-events.interface";
+import { RankChangeDirection, RankChangeInfo } from "../interfaces/rank-change-info.interface";
 import { WatchedAccount, WatchedAccountRank } from "../interfaces/watched-account.interface";
 import { DiscordWebhookAPIService } from "./discord-webhook-api.service";
 import { MessageHelperService } from "./message-helper.service";
@@ -76,20 +77,32 @@ export class RankTrackerService {
     });
   }
 
-  private compareRank(currentSnapshot: WatchedAccountRank, lastSnapshot: WatchedAccountRank): string {
+  private compareRank(player: WatchedAccount, currentSnapshot: WatchedAccountRank, lastSnapshot: WatchedAccountRank): RankChangeInfo {
     const snapshotLp = rankToLP(lastSnapshot.tier, lastSnapshot.rank, lastSnapshot.lp);
     const newLp = rankToLP(currentSnapshot.tier, currentSnapshot.rank, currentSnapshot.lp);
-    const lpDiff = newLp - snapshotLp;;
+    const gamesPlayed = Math.abs(currentSnapshot.games - lastSnapshot.games);
+    const lpDiff = newLp - snapshotLp;
+    const changeAmount: number = Math.abs(lpDiff);
+
+    let changeDirection: RankChangeDirection = "none";
+    let changeMessage: string = "No Change"
 
     if (lpDiff > 0) {
-      return `Up ${lpDiff}`;
+      changeDirection = "up";
+      changeMessage = "Gained";
     } else if (lpDiff < 0) {
-      return `Down ${Math.abs(lpDiff)}`;
-    } else if (lpDiff === 0 && currentSnapshot.games > lastSnapshot.games) {
-      return "Neutral Gains";
+      changeDirection = "down";
+      changeMessage = "Lost";
     }
 
-    return "No Change";
+    return {
+      player,
+      changeAmount,
+      changeDirection,
+      changeMessage,
+      currentSnapshot,
+      gamesPlayed
+    }
   }
 
   public compareRanks(player: WatchedAccount): void {
@@ -104,27 +117,15 @@ export class RankTrackerService {
     const currentSnapshot = player.lastRanks[player.lastRanks.length - 1];
 
     this.eventsToLog.soloQueueTracking.push(
-      this.messageService.lpChangeMessage(
-        player,
-        currentSnapshot.soloDuo.tier,
-        currentSnapshot.soloDuo.rank,
-        currentSnapshot.soloDuo.lp.toString(),
-        this.compareRank(currentSnapshot.soloDuo, lastSnapshot.soloDuo)
-      )
+      this.compareRank(player, currentSnapshot.soloDuo, lastSnapshot.soloDuo)
     );
 
     this.eventsToLog.flexQueueTracking.push(
-      this.messageService.lpChangeMessage(
-        player,
-        currentSnapshot.flex.tier,
-        currentSnapshot.flex.rank,
-        currentSnapshot.flex.lp.toString(),
-        this.compareRank(currentSnapshot.flex, lastSnapshot.flex)
-      )
+      this.compareRank(player, currentSnapshot.flex, lastSnapshot.flex)
     );
   }
 
   public async postUpdateMessage(): Promise<void> {
-    await this.discordApi.post(this.messageService.discordBotMessage(this.eventsToLog));
+    await this.discordApi.post(this.messageService.buildRanksMessage(this.eventsToLog));
   }
 }

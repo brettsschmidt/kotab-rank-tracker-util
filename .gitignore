@@ -1,4 +1,4 @@
 node_modules
 *.local
-./data
-!./data/.gitkeep
+data/
+!data/.gitkeep

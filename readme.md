@@ -18,3 +18,8 @@ Follow the steps below to set up the project. The pre-requisites only have to be
 ### Modifying default users
 By default this project will look for hard coded users defined in `src/helpers/default-players.helpers.ts`. You will have to update this file if you wish to override these players. 
 
+# Where is data stored?
+Currently by default data is stored in a JSON file `./src/data/players-to-watch.json`. This file contains all information about the last known player names, player summoner IDs, player PUUIDs, and rank information. Direct edits can be made to this file. Additionally this is the file that will be used to load the players to track ranks for after data has been seeded. So if you need to add additional players, you'll want to add them to this file.
+
+### Can I change where data is stored?
+Yes. There is a `DataStorageService` in `src/services/data-storage.service.ts` that can be modified to store data in different ways. JSON was the simplest storage to start with. You could however update this to store data in a traditional database or other system if desired. All you have to do is update the `getAccountsToWatch` and `updateAccountsToWatch` methods.

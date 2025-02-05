@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
+    "resolvePackageJsonImports": true,
+
+    "types": [
+      "node"
+    ],
+
+    "outDir": "./dist",
+  },
+
+  "include": [
+    "*.json",
+    "*.ts"
+  ]
+}

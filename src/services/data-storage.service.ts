@@ -3,7 +3,7 @@ import { WatchedAccount } from "../interfaces/watched-account.interface";
 import fs from "fs/promises";
 
 export class DataStorageService {
-  private jsonFilePath = "./src/data/players-to-watch.json";
+  private jsonFilePath = "./src/data/hot-dog-data.json";
 
   public async getAccountsToWatch(): Promise<Array<WatchedAccount>> {
     try {

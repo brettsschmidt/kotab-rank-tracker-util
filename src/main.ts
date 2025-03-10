@@ -8,24 +8,11 @@ dotenvFlow.config();
 const dataStorage = new DataStorageService();
 const trackingService = new RankTrackerService();
 
-const playersToWatch = await dataStorage.getAccountsToWatch();
-
-// Update our data and do LP comparisons
-for (const player of playersToWatch) {
-  // Handle getting all of the information we need to get rank info from Riot's APIs
-  // Also handle name changes
-  await trackingService.updateBasicSummonerInfo(player);
-
-  // Handle getting the latest rank information for solo duo and flex
-  await trackingService.updateRanks(player);
-  
-  // Do the comparisons and generate the LP diff messages
-  trackingService.compareRanks(player);
-}
+const playersToWatch = await dataStorage.getHotDogCount();
 
 // Send our message now
 await trackingService.postUpdateMessage();
 
 // Handle committing the data to whever we're storing it
-await dataStorage.updateAccountsToWatch(playersToWatch);
+await dataStorage.updateUpdateHotDogCount(playersToWatch);
 
